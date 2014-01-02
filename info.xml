@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<extension key="org.civicoop.dgw.api" type="module">
+  <file>api</file>
+  <name>API module voor de Goede Woning</name>
+  <description>API wrapper en backwords compatabiliteit</description>
+  <license>Academic Free License v3.0</license>
+  <maintainer>
+    <author>CiviCooP</author>
+    <email>helpdesk@civicoop.org</email>
+  </maintainer>
+  <releaseDate>2013-04-18</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>This module is being developed and tested</comments>
+  <civix>
+  </civix>
+</extension>
