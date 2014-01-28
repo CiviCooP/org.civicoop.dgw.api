@@ -180,13 +180,13 @@ function civicrm_api3_dgw_hov_create( $inparms ) {
             $mh_end_date = date( "Ymd", strtotime( $inparms['mh_end_date'] ) );
         }
     }
-    $hov_group = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName( 'Huurovereenkomst' );
+    $hov_group = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName( 'Huurovereenkomst (huishouden)' );
     if ( !is_array( $hov_group ) ) {
         return civicrm_api3_create_error( "CustomGroup Huurovereenkomst niet gevonden" );
     }
     $hov_group_id = $hov_group['id'];
     $hov_group_table = $hov_group['table_name'];
-    $hov_group_org = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst__org_');
+    $hov_group_org = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst (organisatie)');
     if ( !is_array( $hov_group_org ) ) {
         return civicrm_api3_create_error( "CustomGroup Huurovereenkomst Org niet gevonden" );
     }
@@ -550,12 +550,12 @@ function civicrm_api3_dgw_hov_update($inparms) {
             $mh_end_date = date("Ymd", strtotime($inparms['mh_end_date']));
         }
     }
-    $hov_group = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst');
+    $hov_group = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst (huishouden)');
     if (!is_array($hov_group)) {
         return civicrm_api3_create_error("CustomGroup Huurovereenkomst niet gevonden");
     }
     $hov_group_id = $hov_group['id'];
-    $hov_group_org = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst__org_');
+    $hov_group_org = CRM_Utils_DgwApiUtils::retrieveCustomGroupByName('Huurovereenkomst (organisatie)');
     if (!is_array($hov_group_org)) {
         return civicrm_api3_create_error("CustomGroup Huurovereenkomst Org niet gevonden");
     }
