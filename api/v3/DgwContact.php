@@ -176,7 +176,9 @@ function civicrm_api3_dgw_contact_get($inparms) {
                 ));
                 if ($civires4['is_error'] == '0' && isset($civires4['values']) && is_array($civires4['values']) && count($civires4['values'])) {
                     $website = reset($civires4['values']);
-                    $data['home_URL'] = $website['url'];
+                    if (isset($website['url'])) {
+                        $data['home_URL'] = $website['url'];
+                    }
                 }
                 $outparms[$i] = $data;
                 $i++;
