@@ -359,7 +359,6 @@ function civicrm_api3_dgw_address_create($inparms) {
     /*
      * set superglobal to avoid double create via post or pre hook
      */
-    $txt = "Inparms in address_create : ";
     $GLOBALS['dgw_api'] = "nosync";
     /*
      * if no contact_id or persoonsnummer_first passed, error
@@ -448,6 +447,9 @@ function civicrm_api3_dgw_address_create($inparms) {
     if (civicrm_error($check_contact)) {
         return civicrm_api3_create_error("Contact niet gevonden");
     } else {
+        if (isset($check_contact['count']) && $check_contact['count'] == 0) {
+            return civicrm_api3_create_error("Contact niet gevonden");
+        }
         $check_contact = reset($check_contact['values']);
         $contact_id = $check_contact['contact_id'];
     }

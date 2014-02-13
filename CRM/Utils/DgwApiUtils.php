@@ -260,7 +260,7 @@ class CRM_Utils_DgwApiUtils {
 	}
 
 	public static function retrievePersoonsNummerFirst($contact_id) {
-		$pers_first = "onbekend";
+		$pers_first = "";
 		$return = self::retrieveCustomValuesForContact(array('contact_id' => $contact_id));
 		if (isset($return['values']) && isset($return['values']['Persoonsnummer_First']) && isset($return['values']['Persoonsnummer_First']['value']) && strlen(isset($return['values']['Persoonsnummer_First']['value'])) ) {
 			$pers_first = $return['values']['Persoonsnummer_First']['value'];

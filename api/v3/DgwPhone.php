@@ -240,10 +240,10 @@ function civicrm_api3_dgw_phone_update($inparms) {
             }
             $changeDate = date('Ymd');
             $civiparms2 = array (
-                            'version' => 3,
-                            'entity_id' => $res_check['contact_id'],
-                            'custom_'.$key_first_field['id'].$fid => $inparms['cde_refno'],
-                            'custom_'.$change_date_field['id'].$fid => $changeDate
+                'version' => 3,
+                'entity_id' => $res_check['contact_id'],
+                'custom_'.$key_first_field['id'].$fid => $inparms['cde_refno'],
+                'custom_'.$change_date_field['id'].$fid => $changeDate
             );
             $civicres2 = civicrm_api('CustomValue', 'Create', $civiparms2);
         }
@@ -559,8 +559,6 @@ function civicrm_api3_dgw_phone_get($inparms) {
 
     /*
      * if contact_id empty and phone_id empty, error
-     *
-     * @Todo write a spec function
      */
     if (!isset($inparms['contact_id']) && !isset($inparms['phone_id'])) {
         return civicrm_api3_create_error("Geen contact_id of phone_id doorgegeven in

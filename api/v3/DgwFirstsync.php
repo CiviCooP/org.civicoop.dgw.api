@@ -341,7 +341,8 @@ function civicrm_api3_dgw_firstsync_get() {
     $outparms = array("");
     $civiparms = array (
         'version' => 3,
-        'group_id' => $group_for_first_sync
+        'group_id' => $group_for_first_sync,
+        'options' => array('limit' => 99999)
     );
     /**
      * Use the GroupContact api
