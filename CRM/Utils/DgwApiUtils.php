@@ -7,6 +7,9 @@
 | Description   :   Class with DGW helper functions for the          |
 |                   custom DGWApi                                    |
 +--------------------------------------------------------------------+
+| BOS1404581 return get values in expected sequence                  |
+| Erik Hommel, 17 April 2014                                         |
++--------------------------------------------------------------------+
 */
 
 /**
