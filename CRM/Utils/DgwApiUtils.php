@@ -457,6 +457,45 @@ class CRM_Utils_DgwApiUtils {
             }
             return $syncRecords;
     }
+    /**
+     * Function to set values in the right sequence and then return the array
+     * Result of call BOS1404581, sequence of values incorrect for First Noa
+     * 
+     * @author Erik Hommel (CiviCooP) <erik.hommel@civicoop.org>
+     * @date 17 Apr 2014
+     * @param array $sequence - array with mandatory sequence of elements
+     * @param array $values - array with values
+     * @return array $result - result array with correct sequence
+     * @access public
+     * @static
+     */
+    public static function setValuesInSeq($sequence, $values) {
+      $result = array();
+      if (empty($values)) {
+        return $result;
+      }
+      if (empty($sequence)) {
+        $result = $values;
+        return $result;
+      }
+      /*
+       * first fill array with values in sequence and remove value element
+       */
+      foreach ($sequence as $valueName) {
+        if (isset($values[$valueName])) {
+          $result[$valueName] = $values[$valueName];
+          unset($values[$valueName]);
+        }
+      }
+      /*
+       * if any value elements remain that are not in the sequence, add them at the end
+       */
+      foreach ($values as $element => $value) {
+        $result[$element] = $value;
+      }
+      return $result;
+    }
+
 }
 
 

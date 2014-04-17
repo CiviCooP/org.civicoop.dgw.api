@@ -603,17 +603,20 @@ function civicrm_api3_dgw_phone_get($inparms) {
         /* Get phone type name */
         $civiparms3 = array('version' => 3, 'id' => $result['phone_type_id']);
         $civires3 = civicrm_api('OptionValue', 'getsingle', $civiparms3);
-        $phoneType = "";
-        if (!civicrm_error($civires3)) {
-            $phoneType = $civires3['label'];
+        $sequence = array('contact_id', 'phone_id', 'location_type', 'is_primary', 'phone_type', 'phone', 'start_date', 'end_date');
+        if (isset($result['location_type_id'])) {
+          $result['location_type'] = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
         }
-        $data = $result;
-        $data['phone_id'] = $data['id'];
-        unset($data['id']);
-        $data['location_type'] = $locationType;
-        $data['phone_type'] = $phoneType;
-        $data['start_date'] = date("Y-m-d");
-        $data['end_date'] = "";
+        if (isset($result['phone_type_id'])) {
+          if (!civicrm_error($civires3)) {
+            $result['phone_type'] = $civires3['label'];
+          }
+        }
+        $result['phone_id'] = $result['id'];
+        $result['start_date'] = date('Y-m-d');
+        $result['end_date'] = '';
+        unset($result['id']);
+        $data = CRM_Utils_DgwApiUtils::setValuesInSeq($sequence, $result);
         $outparms[$i] = $data;
         $i++;
     }

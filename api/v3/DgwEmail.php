@@ -545,15 +545,17 @@ function civicrm_api3_dgw_email_get($inparms) {
     $i = 1;
     foreach ($civires1['values'] as $result) {
         /* Get location type name */
-        $locationType = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
-        $data = $result;
-        $data['email_id'] = $data['id'];
-        unset($data['id']);
-        $data['location_type'] = $locationType;
-        $data['start_date'] = date("Y-m-d");
-        $data['end_date'] = "";
-        $outparms[$i] = $data;
-        $i++;
+      $sequence = array('contact_id', 'email_id', 'location_type', 'is_primary', 'email', 'start_date', 'end_date');
+      if (isset($result['location_type_id'])) {
+        $result['location_type'] = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
+      }
+      $result['email_id'] = $result['id'];
+      $result['start_date'] = date('Y-m-d');
+      $result['end_date'] = '';
+      unset($result['id']);
+      $data = CRM_Utils_DgwApiUtils::setValuesInSeq($sequence, $result);
+      $outparms[$i] = $data;
+      $i++;
     }
     $outparms[0]['record_count'] = $i - 1;
     return $outparms;
