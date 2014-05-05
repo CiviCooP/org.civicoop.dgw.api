@@ -6,6 +6,9 @@
 +--------------------------------------------------------------------+
 | Copyright CiviCoop Academic Free License v3.02013                  |
 +--------------------------------------------------------------------+
+| BOS1307269 Erik Hommel <erik.hommel@civicoop.org> 5 May 2014       |
+| Translate location type thuis to id 1 independent of CiviCRM       |
++--------------------------------------------------------------------+
 */
 
 /**
@@ -17,6 +20,9 @@ function civicrm_api3_dgw_address_update($inparms) {
      * set superglobal to avoid double update via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    $apiConfig = CRM_Utils_ApiConfig::singleton();
+    $thuisID = $apiConfig->locationThuisId;
+    $thuisType = $apiConfig->locationThuis;
     /*
      * if no address_id or adr_refno passed, error
      */
@@ -87,11 +93,18 @@ function civicrm_api3_dgw_address_update($inparms) {
     $params['address_id'] = $address_id;
     if (isset($inparms['location_type'])) {
         $location_type = trim($inparms['location_type']);
-        $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
-        if ($location_type_id == "") {
-            return civicrm_api3_create_error("Location_type is ongeldig");
+        /*
+         * BOS1307269 if location_type = thuis
+         */
+        if ($location_type == $thuisType || $location_type == strtolower($thuisType)) {
+          $location_type_id = $thuisID;
+        } else {
+          $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
+          if ($location_type_id == "") {
+              return civicrm_api3_create_error("Location_type is ongeldig");
+          }
+          $params['location_type_id'] = $location_type_id;
         }
-        $params['location_type_id'] = $location_type_id;
     } else {
         $location_type = "";
     }
@@ -170,7 +183,6 @@ function civicrm_api3_dgw_address_update($inparms) {
             $params['street_number'] = $street_number;
         }
     }
-    $thuisID = CRM_Utils_DgwApiUtils::getLocationIdByName("Thuis");
     $oudID =  CRM_Utils_DgwApiUtils::getLocationIdByName("Oud");
     if ($thuisID == "" || $oudID == "") {
         return civicrm_api3_create_error("Location types zijn niet geconfigureerd");
@@ -186,6 +198,9 @@ function civicrm_api3_dgw_address_update($inparms) {
     }
     if (isset($inparms['city'])) {
         $params['city'] = trim($inparms['city']);
+    }
+    if (isset($inparms['location_type'])) {
+      $params['location_type_id'] = $location_type_id;
     }
     /*
      * compute street address
@@ -360,6 +375,9 @@ function civicrm_api3_dgw_address_create($inparms) {
      * set superglobal to avoid double create via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    $apiConfig = CRM_Utils_ApiConfig::singleton();
+    $thuisID = $apiConfig->locationThuisId;
+    $thuisType = $apiConfig->locationThuis;
     /*
      * if no contact_id or persoonsnummer_first passed, error
      */
@@ -455,10 +473,15 @@ function civicrm_api3_dgw_address_create($inparms) {
     }
     /*
      * if location_type is invalid, error
+     * BOS1307269 incoming location_type 'thuis' is 1 else retrieve from utils
      */
-    $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
-    if ($location_type_id == "") {
-        return civicrm_api3_create_error("Location_type is ongeldig");
+    if ($location_type == strtolower($thuisType)) {
+      $location_type_id = $thuisID;
+    } else {
+      $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
+      if ($location_type_id == "") {
+          return civicrm_api3_create_error("Location_type is ongeldig");
+      }
     }
     /*
      * if is_primary is not 0 or 1, error
@@ -522,7 +545,6 @@ function civicrm_api3_dgw_address_create($inparms) {
     /*
      * all validation passed
      */
-    $thuisID = CRM_Utils_DgwApiUtils::getLocationIdByName("Thuis");
     $oudID =  CRM_Utils_DgwApiUtils::getLocationIdByName("Oud");
     if ($thuisID == "" || $oudID == "") {
         return civicrm_api3_create_error("Location types zijn niet geconfigureerd");
@@ -682,7 +704,15 @@ function civicrm_api3_dgw_address_get($inparms) {
     $i = 1;
     foreach ($civires1['values'] as $result) {
         /* Get location type name */
-        $locationType = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
+        // BOS1307269 use Thuis if location_type_id = $thuisID
+        $apiConfig = CRM_Utils_ApiConfig::singleton();
+        $thuisId = $apiConfig->locationThuisId;
+        $thuisType = $apiConfig->locationThuis;
+        if ($result['location_type_id'] == $thuisId) {
+          $locationType = $thuisType;
+        } else {
+          $locationType = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
+        }
         /*
          * params exactly in expected sequence because NCCW First does not
          * cope otherwise
