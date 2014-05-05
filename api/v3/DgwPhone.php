@@ -9,6 +9,9 @@
 | BOS1404581 return get values in expected sequence                  |
 | Erik Hommel, 17 April 2014                                         |
 +--------------------------------------------------------------------+
+| BOS1307269 Erik Hommel <erik.hommel@civicoop.org> 5 May 2014       |
+| Translate location type thuis to id 1 independent of CiviCRM       |
++--------------------------------------------------------------------+
 */
 
 /*
@@ -20,6 +23,11 @@ function civicrm_api3_dgw_phone_update($inparms) {
      * set superglobal to avoid double update via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    // BOS1307269 introduce api Config class
+    $apiConfig = CRM_Utils_ApiConfig::singleton();
+    $thuisLocationTypeId = $apiConfig->locationThuisId;
+    $thuisLocationType = $apiConfig->locationThuis;
+    
     /*
      * if no phone_id or cde_refno passed, error
      */
@@ -114,10 +122,15 @@ function civicrm_api3_dgw_phone_update($inparms) {
      * if location_type is invalid, error
      */
     if (isset($inparms['location_type'])) {
+      // BOS1307269
+      if ($inparms['location_type'] == $thuisLocationType) {
+        $location_type_id = $thuisLocationTypeId;
+      } else {
         $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($inparms['location_type']);
         if ($location_type_id == "") {
                 return civicrm_api3_create_error("Location_type is ongeldig");
         }
+      }
     }
     /*
      * if phone_type is invalid, error
@@ -321,6 +334,10 @@ function civicrm_api3_dgw_phone_create($inparms) {
      * set superglobal to avoid double create via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    // BOS1307269 introduce api Config class
+    $apiConfig = CRM_Utils_ApiConfig::singleton();
+    $thuisLocationTypeId = $apiConfig->locationThuisId;
+    $thuisLocationType = $apiConfig->locationThuis;
     /*
      * if no contact_id or persoonsnummer_first passed, error
      */
@@ -428,9 +445,14 @@ function civicrm_api3_dgw_phone_create($inparms) {
     /*
      * if location_type is invalid, error
      */
-    $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
-    if ($location_type_id == "") {
+    // BOS1307269
+    if ($location_type == $thuisLocationType || $location_type == strtolower($thuisLocationType)) {
+      $location_type_id = $thuisLocationTypeId;
+    } else {
+      $location_type_id = CRM_Utils_DgwApiUtils::getLocationIdByName($location_type);
+      if ($location_type_id == "") {
         return civicrm_api3_create_error("Location_type is ongeldig");
+      }
     }
     /*
      * if phone_type is invalid, error
@@ -552,6 +574,10 @@ function civicrm_api3_dgw_phone_create($inparms) {
  * Function to get phones for a contact
 */
 function civicrm_api3_dgw_phone_get($inparms) {
+    // BOS1307269 introduce api Config class
+    $apiConfig = CRM_Utils_ApiConfig::singleton();
+    $thuisLocationTypeId = $apiConfig->locationThuisId;
+    $thuisLocationType = $apiConfig->locationThuis;
     /*
      * initialize output parameter array
      */
@@ -602,14 +628,17 @@ function civicrm_api3_dgw_phone_get($inparms) {
     $i = 1;
     foreach ($civires1['values'] as $result) {
         /* Get location type name */
-        $locationType = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
+        // BOS1307269
+        if ($result['location_type_id'] == $thuisLocationTypeId) {
+          $locationType = $thuisLocationType;
+        } else {
+          $locationType = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
+        }
+        $result['location_type'] = $locationType;
         /* Get phone type name */
         $civiparms3 = array('version' => 3, 'id' => $result['phone_type_id']);
         $civires3 = civicrm_api('OptionValue', 'getsingle', $civiparms3);
         $sequence = array('contact_id', 'phone_id', 'location_type', 'is_primary', 'phone_type', 'phone', 'start_date', 'end_date');
-        if (isset($result['location_type_id'])) {
-          $result['location_type'] = CRM_Utils_DgwApiUtils::getLocationByid($result['location_type_id']);
-        }
         if (isset($result['phone_type_id'])) {
           if (!civicrm_error($civires3)) {
             $result['phone_type'] = $civires3['label'];
