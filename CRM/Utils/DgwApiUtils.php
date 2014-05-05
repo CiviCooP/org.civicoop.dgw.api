@@ -514,7 +514,7 @@ class CRM_Utils_DgwApiUtils {
      * 2. street_name, street_number, street_unit, postal_code, city
      * all other patterns return incoming param
      */
-    if (count($parts) == 4 || count($parts)) {
+    if (count($parts) == 4 || count($parts== 5)) {
       $result = self::_parseVgeParts($parts);
     }
     return $result;
