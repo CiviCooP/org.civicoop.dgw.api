@@ -490,12 +490,6 @@ class CRM_Utils_DgwApiUtils {
           unset($values[$valueName]);
         }
       }
-      /*
-       * if any value elements remain that are not in the sequence, add them at the end
-       */
-      foreach ($values as $element => $value) {
-        $result[$element] = $value;
-      }
       return $result;
     }
 
