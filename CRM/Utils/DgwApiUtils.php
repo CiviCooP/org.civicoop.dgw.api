@@ -10,6 +10,9 @@
 | BOS1404581 return get values in expected sequence                  |
 | Erik Hommel, 17 April 2014                                         |
 +--------------------------------------------------------------------+
+| BOS1307269 add function to parse HOV address                       |
+| Erik Hommel <erik.hommel@civicoop.org> 5 May 0214                  |
++--------------------------------------------------------------------+
 */
 
 /**
@@ -492,7 +495,44 @@ class CRM_Utils_DgwApiUtils {
       }
       return $result;
     }
-
+  /**
+   * BOS1307269 function to parse incoming HOV address
+   * 
+   * @author Erik Hommel <erik.hommel@civicoop.org>
+   * @date 5 may 2014
+   * @param string $address
+   * @eturn array $result address elements
+   * @access public
+   * @static
+   */  
+  public static function parseVgeAddress($address) {
+    $result = $address;
+    $parts = explode(',', $address);
+    /*
+     * possible patterns coming from First:
+     * 1. street_name, street_number, postal_code, city
+     * 2. street_name, street_number, street_unit, postal_code, city
+     * all other patterns return incoming param
+     */
+    if (count($parts) == 4 || count($parts)) {
+      $result = self::_parseVgeParts($parts);
+    }
+    return $result;
+  }
+  private static function _parseVgeParts($parts) {
+    $result = array();
+    $result['street_name'] = $parts[0];
+    $result['street_number'] = $parts[1];
+    if (count($parts) == 5) {
+      $result['street_unit'] = $parts[2];
+      $result['postal_code'] = $parts[3];
+      $result['city'] = $parts[4];
+    } else {
+      $result['postal_code'] = $parts[2];
+      $result['city'] = $parts[3];
+    }
+    return $result;
+  }  
 }
 
 
