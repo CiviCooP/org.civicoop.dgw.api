@@ -179,15 +179,13 @@ function _api_civicrm_add_vge_address($address, $contactId) {
       $streetAddressParams['street_unit'] = $addressParts['street_unit'];
       $maxIndex++;
     }
-    $formattedAddress = CRM_Utils_DgwUtils::glueStreetAddressNl($streetAddressParams);
+    $formattedAddress = _glueStreetAddressNl($streetAddressParams);
     if (!civicrm_error($formattedAddress)) {
       $sqlFields[] = 'street_address = %'.$maxIndex;
       $sqlValues[$maxIndex] = array($formattedAddress['parsed_street_address'], 'String');
     }
   }
   $sqlAddress = $sqlAction.implode(', ', $sqlFields).$sqlWhere;
-  CRM_Core_Error::debug("sqlAddress", $sqlAddress);
-  CRM_Core_Error::debug("sqlValues", $sqlValues);
   CRM_Core_DAO::executeQuery($sqlAddress, $sqlValues);
   exit();
 }

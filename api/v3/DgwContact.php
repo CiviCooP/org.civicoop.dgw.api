@@ -495,7 +495,7 @@ function civicrm_api3_dgw_contact_create($inparms) {
             $civiparms["contact_type"] = 'Individual';
             $civiparms["first_name"] = $first_name;
             $civiparms["last_name"] = $last_name;
-            $civiparms["middle_name"] = $middle_name;
+            $civiparms["middle_name"] = CRM_Core_DAO::escapeString($middle_name);
             $civiparms["gender_id"] = $gender_id;
             if (isset($inparms['show_all'])) {
             	$civiparms["show_all"] = $inparms['show_all'];
