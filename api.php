@@ -182,7 +182,7 @@ function _api_civicrm_add_vge_address($address, $contactId) {
     $formattedAddress = _glueStreetAddressNl($streetAddressParams);
     if (!civicrm_error($formattedAddress)) {
       $sqlFields[] = 'street_address = %'.$maxIndex;
-      $sqlValues[$maxIndex] = array($formattedAddress['parsed_street_address'], 'String');
+      $sqlValues[$maxIndex] = array($formattedAddress, 'String');
     }
   }
   $sqlAddress = $sqlAction.implode(', ', $sqlFields).$sqlWhere;
