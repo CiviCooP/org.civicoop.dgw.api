@@ -522,17 +522,15 @@ class CRM_Utils_DgwApiUtils {
   private static function _parseVgeParts($parts) {
     $result = array();
     $result['street_name'] = $parts[0];
-    if (isset($parts[1])) {
-      $result['street_number'] = $parts[1];
-      if (count($parts) == 5) {
-        $result['street_unit'] = $parts[2];
-        $result['postal_code'] = $parts[3];
-        $result['city'] = $parts[4];
-      } else {
-        $result['postal_code'] = $parts[2];
-        $result['city'] = $parts[3];
-      }
-      }
+    $result['street_number'] = $parts[1];
+    if (count($parts) == 5) {
+      $result['street_unit'] = $parts[2];
+      $result['postal_code'] = $parts[3];
+      $result['city'] = $parts[4];
+    } else {
+      $result['postal_code'] = $parts[2];
+      $result['city'] = $parts[3];
+    }
     return $result;
   }  
 }

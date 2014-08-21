@@ -123,9 +123,24 @@ function api_civicrm_custom($op, $groupId, $entityId, $params) {
       foreach ($params as $param) {
         if ($param['custom_field_id'] == $vgeAddressId) {
           /*
-           * create or update Vge Address
+           * create or update Vge Address for household
            */
           _api_civicrm_add_vge_address($param['value'], $entityId);
+          /*
+           * do the same for all hoofdhuurders/medehuurders if found
+           */
+          $hoofdHuurders = CRM_Utils_DgwUtils::getHoofdhuurders($entityId, false);
+          foreach ($hoofdHuurders as $hoofdHuurder) {
+            if (isset($hoofdHuurder['contact_id']) && !empty($hoofdHuurder['contact_id'])) {
+              _api_civicrm_add_vge_address($param['value'], $hoofdHuurder['contact_id']);
+            }
+          }
+          $medeHuurders = CRM_Utils_DgwUtils::getMedehuurders($entityId, false);
+          foreach ($medeHuurders as $medeHuurder) {
+            if (isset($medeHuurder['medehuurder_id']) && !empty($medeHuurder['medehuurder_id'])) {
+              _api_civicrm_add_vge_address($param['value'], $medeHuurder['medehuurder_id']);
+            }
+          }
         }
       }
     }
@@ -187,5 +202,4 @@ function _api_civicrm_add_vge_address($address, $contactId) {
   }
   $sqlAddress = $sqlAction.implode(', ', $sqlFields).$sqlWhere;
   CRM_Core_DAO::executeQuery($sqlAddress, $sqlValues);
-  exit();
 }
