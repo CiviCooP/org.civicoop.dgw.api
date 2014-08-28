@@ -203,7 +203,7 @@ class CRM_Utils_DgwApiUtils {
 			$custom_field = self::retrieveCustomFieldByName($key);
 			if (is_array($custom_field)) {
 				$field_name = $custom_field['column_name'];
-				$where .= " AND `".$field_name."` = '".mysql_escape_string($value)."'";
+				$where .= " AND ".$field_name." = '".mysql_escape_string($value)."'";
 			}
 		}
 		if (strlen($where)) {
