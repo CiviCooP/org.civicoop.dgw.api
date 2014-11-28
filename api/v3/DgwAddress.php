@@ -617,10 +617,23 @@ function civicrm_api3_dgw_address_create($inparms) {
             }
         }
     }
-    $res_adr = civicrm_api('Address', 'create', $addressParams);
-    if (civicrm_error($res_adr)) {
+    /*
+     * BOS1411088 if location_type == toekomst and address already exists,
+     * no error but no action either
+     */
+    $outparms = array();
+    if ($location_type == 'toekomst') {
+      $check_toekomst_result_address_id = _check_toekomst_result_address_id($addressParams);
+      if (!empty($check_toekomst_result_address_id)) {
+        $outparms['address_id'] = $check_toekomst_result_address_id;
+        $outparms['is_error'] = '0';
+      }
+    }
+    if (empty($outparms)) {
+      $res_adr = civicrm_api('Address', 'create', $addressParams);
+      if (civicrm_error($res_adr)) {
         return civicrm_api3_create_error("Onverwachte fout van CiviCRM, adres kon niet gemaakt worden, melding : ".$res_adr['error_message']);
-    } else {
+      } else {
         /*
          * retrieve address_id from result array
          */
@@ -630,31 +643,32 @@ function civicrm_api3_dgw_address_create($inparms) {
          * synchronization if adr_refno passed as parameter
          */
         if (isset($inparms['adr_refno'])) {
-            $action_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('action');
-            $entity_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('entity');
-            $entity_id_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('entity_id');
-            $key_first_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('key_first');
-            $change_date_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('change_date');
-            $changeDate = date('Ymd');
-            $civiparms5 = array (
-                'version' => 3,
-                'entity_id' => $contact_id,
-                'custom_'.$action_field['id'] => "none",
-                'custom_'.$entity_field['id'] => "address",
-                'custom_'.$entity_id_field['id'] => $address_id,
-                'custom_'.$key_first_field['id'] => $inparms['adr_refno'],
-                'custom_'.$change_date_field['id'] => $changeDate
-                );
-            $civicres5 = civicrm_api('CustomValue', 'Create', $civiparms5);
+          $action_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('action');
+          $entity_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('entity');
+          $entity_id_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('entity_id');
+          $key_first_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('key_first');
+          $change_date_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('change_date');
+          $changeDate = date('Ymd');
+          $civiparms5 = array (
+            'version' => 3,
+            'entity_id' => $contact_id,
+            'custom_'.$action_field['id'] => "none",
+            'custom_'.$entity_field['id'] => "address",
+            'custom_'.$entity_id_field['id'] => $address_id,
+            'custom_'.$key_first_field['id'] => $inparms['adr_refno'],
+            'custom_'.$change_date_field['id'] => $changeDate
+            );
+          $civicres5 = civicrm_api('CustomValue', 'Create', $civiparms5);
         }
         /*
          * return array
          */
         $outparms['address_id'] = $address_id;
         $outparms['is_error'] = "0";
-     }
-     unset($GLOBALS['dgw_api']);
-     return $outparms;
+      } 
+    }
+    unset($GLOBALS['dgw_api']);
+    return $outparms;
 }
 /**
  * Function to get addresss for a contact
@@ -846,4 +860,58 @@ function _removeAllOudAddresses($contact_id, $oudID) {
             $civires4 = civicrm_api('Address', 'delete', $civiparms4);
         }
     }
+}
+/**
+ * Function to check if toekomst address already exists
+ * BOS1411088
+ */
+function _check_toekomst_result_address_id($address_params) {
+  $address_id = 0;
+  if (isset($address_params['contact_id']) && !empty($address_params['contact_id'])) {
+    $check_query = _check_toekomst_build_query($address_params);
+    if (!empty($check_query)) {
+      $dao = CRM_Core_DAO::executeQuery($check_query['query'], $check_query['params']);
+      while ($dao->fetch()) {
+        $address_id = $dao->id;
+      }
+    }
+  }
+  return $address_id;
+}
+/**
+ * Function to set query and params for check address id
+ * BOS1411088
+ * 
+ * @param array $address_params
+ * @return array $check_query
+ */
+function _check_toekomst_build_query($address_params) {
+  $check_query = array();
+  $count_param = 3;
+  $check_query['params'] = array(
+    1 => array($address_params['location_type_id'], 'Positive'),
+    2 => array($address_params['contact_id'], 'Positive'));
+  $where_fields = array(
+    'street_name' => 'String', 
+    'street_number' => 'Positive', 
+    'street_unit' => 'String', 
+    'street_address' => 'String', 
+    'city' => 'String', 
+    'postal_code' => 'String');
+  $where_clauses = array();
+  foreach ($where_fields as $where_field => $where_type) {
+    if (isset($address_params[$where_field])) {
+      $where_clause = $where_field.' = %'.$count_param;
+      $where_clauses[] = $where_clause;
+      $check_query['params'][$count_param] = array($address_params[$where_field], $where_type);
+      $count_param++;
+    }
+  }
+  if (!empty($where_clauses)) {
+    $check_query['query'] = 'SELECT id FROM civicrm_address '
+      . 'WHERE location_type_id = %1 AND contact_id = %2 AND '.implode(' AND ', $where_clauses);
+  } else {
+    $check_query = array();
+  }
+  return $check_query;
 }
