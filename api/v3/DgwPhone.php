@@ -41,6 +41,7 @@ function civicrm_api3_dgw_phone_update($inparms) {
     }
     if (isset($inparms['cde_refno'])) {
         $cde_refno = trim($inparms['cde_refno']);
+        $phone_id = CRM_Utils_DgwApiUtils::getEntityIdFromSyncTable($cde_refno, 'phone');
     } else {
         $cde_refno = null;
     }
@@ -69,17 +70,6 @@ function civicrm_api3_dgw_phone_update($inparms) {
             $end_date = $inparms['end_date'];
         }
     }
-    if (!isset($inparms['phone_id']) && !empty($inparms['phone_id'])) {
-        /*
-         * if $cde_refno is used, retrieve phone_id from synchronisation First table
-         */
-        if (!empty($cde_refno)) {
-            $phone_id = CRM_Utils_DgwApiUtils::getEntityIdFromSyncTable($cde_refno, 'phone');
-        }
-    } else {
-        $phone_id = $inparms['phone_id'];
-    }
-
     /*
      * if $phone_id is still empty, error
      */

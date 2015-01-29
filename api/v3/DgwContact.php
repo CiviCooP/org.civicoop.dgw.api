@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  +--------------------------------------------------------------------+
  | De Goede Woning CiviCRM  Specifieke Contact API, gebaseerd op      |
  |                          standaard CiviCRM Contact API             |
@@ -48,7 +48,7 @@
  +--------------------------------------------------------------------+
  */
 
-/*
+/**
  * Function to get details of a contact
  */
 function civicrm_api3_dgw_contact_get($inparms) {
@@ -188,7 +188,7 @@ function civicrm_api3_dgw_contact_get($inparms) {
     $outparms[0]['record_count'] = ($i - 1);
     return ($outparms);
 }
-/*
+/**
  * Function to create new contact
  */
 function civicrm_api3_dgw_contact_create($inparms) {
@@ -231,12 +231,16 @@ function civicrm_api3_dgw_contact_create($inparms) {
          * first and last name are mandatory
          * issue 85: not for First org (gender = 4)
          */
-        if (!isset($inparms['first_name']) && $inparms['gender_id'] != 4) {
+        if (!isset($inparms['first_name']) && (isset($inparms['gender_id']) && $inparms['gender_id'] != 4)) {
             return civicrm_api3_create_error("Geen first_name/last_name of name gevonden");
         } else {
-            $first_name = trim($inparms['first_name']);
+            if (isset($inparms['first_name'])) {
+                $first_name = trim($inparms['first_name']);
+            } else {
+                $first_name = '';
+            }
         }
-        if (empty($first_name) && $inparms['gender_id'] != 4) {
+        if (empty($first_name) && (isset($inparms['gender_id']) && $inparms['gender_id'] != 4)) {
             return civicrm_api3_create_error("Geen first_name/last_name of name gevonden");
         }
         if (!isset($inparms['last_name'])) {
@@ -629,7 +633,7 @@ function civicrm_api3_dgw_contact_create($inparms) {
         "is_error"      =>  0);
      return $outparms;
 }
-/*
+/**
  * Function to update contact
  */
 function civicrm_api3_dgw_contact_update($inparms) {
@@ -965,11 +969,12 @@ function civicrm_api3_dgw_contact_update($inparms) {
                          * if name is empty or not set, check first, middle and
                          * last name
                          */
+                        $civiparms['organization_name'] = '';
                         if (isset($inparms['first_name']) && !empty($inparms['first_name'])) {
                             $civiparms['organization_name'] = trim($inparms['first_name']);
                         }
                         if (isset($inparms['middle_name']) && !empty($inparms['middle_name'])) {
-                            $civiparms['organziation_name'] .= trim($inparms['middle_name']);
+                            $civiparms['organization_name'] .= trim($inparms['middle_name']);
                         }
                         if (isset($inparms['last_name']) && !empty($inparms['last_name'])) {
                             $civiparms['organization_name'] .= trim($inparms['last_name']);
