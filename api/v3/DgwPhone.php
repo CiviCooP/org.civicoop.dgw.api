@@ -40,8 +40,10 @@ function civicrm_api3_dgw_phone_update($inparms) {
         $phone_id = null;
     }
     if (isset($inparms['cde_refno'])) {
-        $cde_refno = trim($inparms['cde_refno']);
+      $cde_refno = trim($inparms['cde_refno']);
+      if (empty($phone_id)) {
         $phone_id = CRM_Utils_DgwApiUtils::getEntityIdFromSyncTable($cde_refno, 'phone');
+      }
     } else {
         $cde_refno = null;
     }
