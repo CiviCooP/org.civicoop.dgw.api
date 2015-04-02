@@ -12,6 +12,9 @@
 | BOS1307269 Erik Hommel <erik.hommel@civicoop.org> 5 May 2014       |
 | Translate location type thuis to id 1 independent of CiviCRM       |
 +--------------------------------------------------------------------+
+| BOS1307645 Erik Hommel <erik.hommel@civicoop.org> 2 Apr 2015       |
+| Cde_refno required for create                                      |
++--------------------------------------------------------------------+
 */
 
 /*
@@ -350,6 +353,13 @@ function civicrm_api3_dgw_phone_create($inparms) {
         return civicrm_api3_create_error("Contact_id en persoonsnummer_first ontbreken beiden");
     }
     /*
+     * BOS1307645 cde_refno is required
+     */
+    if (!isset($inparms['cde_refno']) || empty($inparms['cde_refno'])) {
+      return civicrm_api3_create_error('Cde_refno is required for the synchronization between First Noa and CiviCRM');
+    }
+
+    /*
      * if no location_type passed, error
      */
     if (!isset($inparms['location_type'])) {
@@ -403,6 +413,7 @@ function civicrm_api3_dgw_phone_create($inparms) {
             $end_date = $inparms['end_date'];
         }
     }
+
     $persoonsnummer_first_field = CRM_Utils_DgwApiUtils::retrieveCustomFieldByName('persoonsnummer_first');
     /*
      * if contact not in civicrm, error
