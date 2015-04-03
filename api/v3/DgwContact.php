@@ -221,6 +221,18 @@ function civicrm_api3_dgw_contact_create($inparms) {
             return civicrm_api3_create_error("Geen first_name/last_name of name gevonden");
         }
     }
+    
+    /*
+     * BOS1503891 insite - qoutes en apostrophes in civi
+     * First sends contacts with slashes before qoutes
+     * Here they extra slashes are removed
+     */
+    foreach($inparms as $field => $value){
+      if(!is_array($value)){
+        $inparms[$field] = stripslashes($value);
+      }
+    }
+    
     $gender_group_id = CRM_Utils_DgwApiUtils::getOptionGroupIdByTitle('gender');
     $gender_values = CRM_Utils_DgwApiUtils::getOptionValuesByGroupId($gender_group_id);
     /*
@@ -660,6 +672,18 @@ function civicrm_api3_dgw_contact_update($inparms) {
     if (empty($contact_id) && empty($pers_nr)) {
         return civicrm_api3_create_error("Contact_id en persoonsnummer_first ontbreken beiden");
     }
+    
+    /*
+     * BOS1503891 insite - qoutes en apostrophes in civi
+     * First sends contacts with slashes before qoutes
+     * Here they extra slashes are removed
+     */
+    foreach($inparms as $field => $value){
+      if(!is_array($value)){
+        $inparms[$field] = stripslashes($value);
+      }
+    }
+    
     /*
      * contact has to exist in CiviCRM, either with contact_id or with
      * persoonsnummer_first. This needs to be checked with contact_id first,
