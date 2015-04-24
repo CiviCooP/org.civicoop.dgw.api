@@ -196,6 +196,18 @@ function civicrm_api3_dgw_contact_create($inparms) {
      * set superglobal to avoid double create via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    
+    /*
+     * BOS1503891 insite - qoutes en apostrophes in civi
+     * First sends contacts with slashes before qoutes
+     * Here they extra slashes are removed
+     */
+    foreach($inparms as $field => $value){
+      if(!is_array($value)){
+        $inparms[$field] = stripslashes($value);
+      }
+    }
+        
     /*
      * If contact_type passed and not valid, error. Else set contact_type
      * to default 'Individual'
@@ -220,17 +232,6 @@ function civicrm_api3_dgw_contact_create($inparms) {
         if (empty($name)) {
             return civicrm_api3_create_error("Geen first_name/last_name of name gevonden");
         }
-    }
-    
-    /*
-     * BOS1503891 insite - qoutes en apostrophes in civi
-     * First sends contacts with slashes before qoutes
-     * Here they extra slashes are removed
-     */
-    foreach($inparms as $field => $value){
-      if(!is_array($value)){
-        $inparms[$field] = stripslashes($value);
-      }
     }
     
     $gender_group_id = CRM_Utils_DgwApiUtils::getOptionGroupIdByTitle('gender');
@@ -460,6 +461,8 @@ function civicrm_api3_dgw_contact_create($inparms) {
     if (isset($inparms['middle_name'])) {
     	$middle_name = trim($inparms['middle_name']);
     }
+    
+    $gender_id = '';    
     if ($gender_id == 4) {
         $contact_type = "Organization";
         $name = null;
@@ -511,7 +514,13 @@ function civicrm_api3_dgw_contact_create($inparms) {
             $civiparms["contact_type"] = 'Individual';
             $civiparms["first_name"] = $first_name;
             $civiparms["last_name"] = $last_name;
-            $civiparms["middle_name"] = CRM_Core_DAO::escapeString($middle_name);
+            /*
+             * BOS1503891 insite - qoutes en apostrophes in civi
+             * First sends contacts with slashes before qoutes
+             * It is not needed to escape the string here it will be done before it will be inserted in the database
+             */
+            //$civiparms["middle_name"] = CRM_Core_DAO::escapeString($middle_name); // orgineel
+            $civiparms["middle_name"] = $middle_name;
             $civiparms["gender_id"] = $gender_id;
             if (isset($inparms['show_all'])) {
             	$civiparms["show_all"] = $inparms['show_all'];
@@ -523,7 +532,7 @@ function civicrm_api3_dgw_contact_create($inparms) {
     }
     /*
      * use standard API to create CiviCRM contact
-     */
+     */    
     $create_contact = civicrm_api('Contact', 'create', $civiparms);
     if (civicrm_error($create_contact)) {
     	return civicrm_api3_create_error('Onbekende fout: '.$create_contact['error_message']);
@@ -636,6 +645,11 @@ function civicrm_api3_dgw_contact_create($inparms) {
             $customparms['custom_'.$key_first_field['id']] = $pers_first;
             $customparms['custom_'.$nr_in_first_field['id']] = $pers_first;
             $customparms['contact_id'] = $contact_id;
+            
+            echo('<pre>');
+        print_r($customparms);
+        echo('</pre>');
+        exit();
             $civicres2 = civicrm_api('CustomValue', 'Create', $customparms);
         }
      }
@@ -653,6 +667,18 @@ function civicrm_api3_dgw_contact_update($inparms) {
      * set superglobal to avoid double update via post or pre hook
      */
     $GLOBALS['dgw_api'] = "nosync";
+    
+    /*
+     * BOS1503891 insite - qoutes en apostrophes in civi
+     * First sends contacts with slashes before qoutes
+     * Here they extra slashes are removed
+     */
+    foreach($inparms as $field => $value){
+      if(!is_array($value)){
+        $inparms[$field] = stripslashes($value);
+      }
+    }
+    
     /*
      * if no contact_id or persoonsnummer_first passed, error
      */
@@ -671,17 +697,6 @@ function civicrm_api3_dgw_contact_update($inparms) {
     }
     if (empty($contact_id) && empty($pers_nr)) {
         return civicrm_api3_create_error("Contact_id en persoonsnummer_first ontbreken beiden");
-    }
-    
-    /*
-     * BOS1503891 insite - qoutes en apostrophes in civi
-     * First sends contacts with slashes before qoutes
-     * Here they extra slashes are removed
-     */
-    foreach($inparms as $field => $value){
-      if(!is_array($value)){
-        $inparms[$field] = stripslashes($value);
-      }
     }
     
     /*
