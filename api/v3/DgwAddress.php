@@ -604,17 +604,17 @@ function civicrm_api3_dgw_address_create($inparms) {
      * if location_type = toekomst or oud, set start and end date in add field
      */
     if ($location_type == "oud" || $location_type == "toekomst") {
+        $toekomstArray = array();
         if (isset($start_date) && !empty($start_date)) {
             $datum = date("d-m-Y", strtotime($start_date));
-            $addressParams['supplemental_address_1'] = "(Vanaf $datum";
+            $toekomstArray[] = 'Vanaf '.$datum;
         }
         if (isset($end_date) && !empty($end_date)) {
             $datum = date("d-m-Y", strtotime($end_date));
-            if (isset($addressParams['supplemental_address_1']) && !empty($addressParams['supplemental_address_1'])) {
-                $addressParams['supplemental_address_1'] = $addressParams['supplemental_address_1']." tot ".$datum.")";
-            } else {
-                $addressParams['supplemental_address_1'] = "(Tot ".$datum.")";
-            }
+            $toekomstArray[] = 'tot '.$datum;
+        }
+        if (!empty($toekomstArray)) {
+          $addressParams['supplemental_address_1'] = '('.implode(' ', $toekomstArray).')';
         }
     }
     /*
