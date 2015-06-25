@@ -46,6 +46,10 @@
  | Author	:	Erik Hommel (erik.hommel@civicoop.org)        |
  | Date		:	07 Feb 2013                                   |
  +--------------------------------------------------------------------+
+ | Incident BOSW1506024 Error with multiselect in XML                 |
+ | @author Erik Hommel <erik.hommel@civicoop.org>                     |
+ +--------------------------------------------------------------------+
+
  */
 
 /**
@@ -156,7 +160,14 @@ function civicrm_api3_dgw_contact_get($inparms) {
                                 $data[$value['name'].'_id'] = $value['value'];
                                 $data[$value['name']] = $value['normalized_value'];
                             } else {
-                                $data[$value['name']] = $value['value'];
+                                /*
+                                 * BOSW1506024 fix if value is array
+                                 */
+                                if (is_array($value['value'])) {
+                                  $data[$value['name']] = implode(CRM_Core_DAO::VALUE_SEPARATOR, $value['value']);
+                                } else {
+                                  $data[$value['name']] = $value['value'];
+                                }
                             }
                 	}
                     }
