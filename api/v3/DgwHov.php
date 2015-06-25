@@ -669,10 +669,9 @@ function civicrm_api3_dgw_hov_update($inparms) {
                 'relationship_type_id' => $rel_hfd_id,
                 'contact_id_b' => $huis_id,
             );
-            $res = civicrm_api('Relationship', 'Get', $parms);
+            $res = civicrm_api3('Relationship', 'Get', $parms);
             $updated = false;
             if (!civicrm_error($res)) {
-                $rel_params['version'] = 3;
                 if (isset($hh_start_date) && !empty($hh_start_date)) {
                     $rel_params['start_date'] = $hh_start_date;
                 }
@@ -682,15 +681,15 @@ function civicrm_api3_dgw_hov_update($inparms) {
                 /*
                  * if none exist yet, create
                  */
+                $rel_params['contact_id_a'] = $hh_id;
                 if (isset($res['count']) && $res['count'] == 0) {
                     $rel_params['relationship_type_id'] = $rel_hfd_id;
-                    $rel_params['contact_id_a'] = $hh_id;
                     $rel_params['contact_id_b'] = $huis_id;
-                    $createRel = civicrm_api('Relationship', 'Create', $rel_params);
+                    $createRel = civicrm_api3('Relationship', 'Create', $rel_params);
                 } else {
                     foreach($res['values'] as $rid => $value) {
                         $rel_params['id'] = $rid;
-                        civicrm_api('Relationship', 'Create', $rel_params);
+                        civicrm_api3('Relationship', 'Create', $rel_params);
                         $updated = true;
                     }
                 }
@@ -720,9 +719,9 @@ function civicrm_api3_dgw_hov_update($inparms) {
                 /*
                  * if none exist yet, create
                  */
+                $rel_params['contact_id_a'] = $mh_id;
                 if (isset($res['count']) && $res['count'] == 0) {
                     $rel_params['relationship_type_id'] = $rel_med_id;
-                    $rel_params['contact_id_a'] = $mh_id;
                     $rel_params['contact_id_b'] = $huis_id;
                     $createRel = civicrm_api('Relationship', 'Create', $rel_params);
                 } else {

@@ -623,7 +623,11 @@ function civicrm_api3_dgw_address_create($inparms) {
      */
     $outparms = array();
     if ($location_type == 'toekomst') {
+      CRM_Core_Error::debug('loc type', $location_type);
+      CRM_Core_Error::debug('params', $addressParams);
       $check_toekomst_result_address_id = _check_toekomst_result_address_id($addressParams);
+      CRM_Core_Error::debug('check', $check_toekomst_result_address_id);
+      exit();
       if (!empty($check_toekomst_result_address_id)) {
         $outparms['address_id'] = $check_toekomst_result_address_id;
         $outparms['is_error'] = '0';
@@ -869,6 +873,7 @@ function _check_toekomst_result_address_id($address_params) {
   $address_id = 0;
   if (isset($address_params['contact_id']) && !empty($address_params['contact_id'])) {
     $check_query = _check_toekomst_build_query($address_params);
+    CRM_Core_Error::debug('check_query', $check_query);
     if (!empty($check_query)) {
       $dao = CRM_Core_DAO::executeQuery($check_query['query'], $check_query['params']);
       while ($dao->fetch()) {
