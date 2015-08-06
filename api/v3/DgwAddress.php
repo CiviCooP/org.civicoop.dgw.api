@@ -361,6 +361,20 @@ function civicrm_api3_dgw_address_delete($inparms) {
         'id'        =>  $address_id
         );
     $res = civicrm_api( 'Address', 'delete', $address );
+
+    /*
+     * BOS1508100 remove record from sync table
+     */
+    if (!civicrm_error($res)) {
+        $deleteSyncParams = array(
+          'entity' => "address",
+          'entity_id' => $address_id);
+        CRM_Utils_SyncUtils::deleteSyncRecord($deleteSyncParams);
+    }
+    /*
+     * end BOS1508100
+     */
+
     $outparms['is_error'] = "0";
     unset($GLOBALS['dgw_api']);
     return $outparms;

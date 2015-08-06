@@ -12,6 +12,9 @@
 | BOS1307269 Erik Hommel <erik.hommel@civicoop.org> 5 May 2014       |
 | Translate location type thuis to id 1 independent of CiviCRM       |
 +--------------------------------------------------------------------+
+| BOS1508100 Erik Hommel <erik.hommel@civicoop.org> 6 aug 2015       |
+| Remove sync record if email is deleted                             |
++--------------------------------------------------------------------+
 */
 
 /*
@@ -69,6 +72,20 @@ function civicrm_api3_dgw_email_delete($inparms) {
         'id'        =>  $email_id
     );
     $res = civicrm_api('Email', 'delete', $emailParams );
+
+    /*
+     * BOS1508100 remove record from sync table
+     */
+    if (!civicrm_error($res)) {
+        $deleteSyncParams = array(
+            'entity' => "email",
+            'entity_id' => $email_id);
+        CRM_Utils_SyncUtils::deleteSyncRecord($deleteSyncParams);
+    }
+    /*
+     * end BOS1508100
+     */
+
     unset($GLOBALS['dgw_api']);
     $outparms['is_error'] = "0";
     return $outparms;
