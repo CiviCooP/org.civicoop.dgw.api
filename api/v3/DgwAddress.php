@@ -523,14 +523,16 @@ function civicrm_api3_dgw_address_create($inparms) {
     }
     /*
      * if country_iso does not exist in CiviCRM, error
+     * BOS1508101 default county is NL
      */
-    if (isset($inparms['country_iso'])) {
-        $country_iso = trim($inparms['country_iso']);
-        $countries = CRM_Core_PseudoConstant::countryIsoCode();
-        $country_id = array_search($country_iso, $countries);
-        if (!$country_id) {
-            return civicrm_api3_create_error("Country_iso ".$country_iso." komt niet voor");
-        }
+    if (!isset($inparms['country_iso'])) {
+        $inparms['country_iso'] = "NL";
+    }
+    $country_iso = trim($inparms['country_iso']);
+    $countries = CRM_Core_PseudoConstant::countryIsoCode();
+    $country_id = array_search($country_iso, $countries);
+    if (!$country_id) {
+        return civicrm_api3_create_error("Country_iso ".$country_iso." komt niet voor");
     }
     /*
      * if postcode entered and invalid format, error
@@ -542,9 +544,9 @@ function civicrm_api3_dgw_address_create($inparms) {
             return civicrm_api3_create_error("Postcode ".$postcode." is ongeldig");
         }
     }
-    /*
+    /*---------------------------------------------------------------------------
      * all validation passed
-     */
+     ---------------------------------------------------------------------------*/
     $oudID =  CRM_Utils_DgwApiUtils::getLocationIdByName("Oud");
     if ($thuisID == "" || $oudID == "") {
         return civicrm_api3_create_error("Location types zijn niet geconfigureerd");
